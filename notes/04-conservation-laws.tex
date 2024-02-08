@@ -1,0 +1,216 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+%\usepackage{amsfonts}
+\usepackage{amsthm}
+%\usepackage{amssymb}
+%\usepackage{mathrsfs}
+%\usepackage{fullpage}
+%\usepackage{mathptmx}
+%\usepackage[varg]{txfonts}
+\usepackage{color}
+\usepackage[charter]{mathdesign}
+\usepackage[pdftex]{graphicx}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage[modulo, displaymath, mathlines]{lineno}
+%\usepackage{setspace}
+%\usepackage[titletoc,toc,title]{appendix}
+\usepackage{natbib}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+%\linenumbers
+%\doublespacing
+
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+\newtheorem*{exm}{Example}
+
+\theoremstyle{plain}
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+\newtheorem*{prop}{Proposition}
+\newtheorem*{cor}{Corollary}
+
+\newcommand{\argmin}{\text{argmin}}
+\newcommand{\ud}{\hspace{2pt}\mathrm{d}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\PP}{\mathsf{P}}
+
+\title{Conservation laws}
+\author{Daniel Shapero}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Extensive and intensive quantities}
+
+When we write down some equations of motion for a physical system, we need to decide what quantities it is we're interested in and what are the key unknowns to be solved for.
+In physics, there are two different kinds of quantities: \emph{extensive} and \emph{intensive}.
+An extensive quantity is one whose value is proportional to the size of the system or the number of particles in it.
+An intensive quantity is one whose value does not change with system size, assuming the system is in thermodynamic equilibrium.
+
+The important extensive quantities are mass, momentum, and energy.
+For an isolated system in thermodynamic equilibrium, these quantities do not change in time.
+Velocity and temperature are intensive quantities corresonding respectively to momentum and energy.
+Although it might be preferable to describe the state of a system using intensive quantities like velocity and temperature, we can only establish conservation laws for extensive quantities.
+This is all a little vague right now but will make more sense soon.
+
+
+\section{Conservation laws}
+
+For an isolated system in equilibrium, the extensive quantities don't change.
+In the geosciences, we're often thinking about systems that are not isolated or in equilibrium.
+How do we define what the dynamics are?
+We can break up the system we're interested in into smaller sub-systems and look at how they interact with each other and the rest of the environment.
+For example, if we were simulating the state of the atmosphere, we might conceptually break it up into different altitude or pressure levels, which we then further divide into a regular grid.
+
+A \emph{conservation law} is a statement about how the values of some extensive quantity change in time inside some arbitrary \emph{control volume}.
+To be specific, let $\phi$ be some extensive quantity and $\omega$ an arbitrary set inside the domain $\Omega$.
+A conservation law states that the rate of change of this quantity inside the control volume is equal to the rate at which it is entering and leaving through the boundary of the volume, plus any sources inside it.
+We define the \emph{flux} $\bs F$ as the rate at which this extensive quantity is entering and leaving the boundary of the control volume, and $S$ as the source terms.
+Putting everything together, the mathematical form of the law is
+\begin{equation}
+    \frac{d}{dt}\int_\omega\phi\;dx + \int_{\partial\omega}\bs F\cdot\bs \nu\;ds = \int_\omega S\;dx
+\end{equation}
+where $\bs \nu$ is the unit outward normal vector to the boundary $\partial\omega$.
+
+Three things are worth noting here.
+First, I haven't told you what the flux is yet.
+In general, the flux can depend on $\phi$, on its gradient $\nabla\phi$, or on other external fields.
+The mathematical form of the flux depends on both what the medium is and what field we are considering.
+We'll see some examples later.
+Second, this law has to hold \emph{for all} possible control volumes $\omega$ contained in $\Omega$.
+Finally, I've used my typographic convention here as if $\phi$ were a scalar field, like mass density.
+In that case, the flux $\bs F$ is a vector field.
+But we could also consider vector or tensor extensive quantities.
+The general rule is that \emph{the flux has one higher rank than the field.}
+So mass density is a scalar field, and its flux is a vector field.
+But momentum density is a vector field, and thus its flux is a rank-2 tensor field.
+
+The simplest conservation law imaginable is for mass.
+This is easiest to visualize for, say, a compressible gas.
+Let $\rho$ be the (spatially variable) material density and $\bs u$ the velocity.
+Then $\rho$ is the density of an extensive equantity, and the flux of mass is
+\begin{equation}
+    \bs F = \rho\bs u.
+\end{equation}
+In other words, mass is transported exclusively by bulk movement of the medium.
+Usually, there are no sources except at the boundary of the domain.
+
+Describing energy transport is a more interesting problem.
+First, the natural field to work with is the temperature $T$, but this is an intensive and not an extensive quantity.
+The energy density $E$ is related to the temperature by
+\begin{equation}
+    E = \rho c_pT
+\end{equation}
+where $c_p$ is the specific heat of the medium at constant pressure, which has units of energy per unit mass per degree Kelvin.
+Additionally, there are two ways to transport energy.
+This first is by bulk movement of the medium, just like for mass.
+The second is by molecular diffusion.
+The diffusion law states that the transport of energy is proportional to the temperature gradient and tends to transport heat from hotter to colder areas.
+Putting these two considerations together, we get
+\begin{equation}
+    \bs F = \rho c_pT\bs u - k\nabla T
+\end{equation}
+where $k$ is the thermal conductivity, which has units of energy / (time $\times$ temperature $\times$ length).
+Now that there are two ways to transport heat, we can have very different regimes: advection- or diffusion-dominated.
+We'll see examples of both at some point.
+The volumetric sources of heat depend on the situation; for example, in a viscous fluid, there is strain heating.
+In Earth's interior, there are volumetric heat sources from radioactive decay.
+
+We cannot solve a conservation law exactly.
+To discretize, we divide up the domain into a \emph{finite} set of control volumes.
+We then assume that the field of interest to us is either constant or linear in every control volume.
+This reduces the conservation law to a finite-dimensional system of ordinary differential equations that we can solve with the method of our choice, like the collocation methods we saw before.
+This approach gives a family of numerical schemes called \emph{finite volume} methods (FVM).
+These methods are very popular in aeronautics or other domains involving fluid dynamics at very high Reynolds number.
+The FVM people figured out all the really hard and annoying parts of numerical methods before everybody else.
+We won't talk much about FVM in this class because many types of FVM can be subsumed into certain Galerkin methods (see below).
+
+
+\section{Differential equations}
+
+Differential equations are lies.
+They are lies that we tell ourselves because they are convenient for certain tasks.
+For example, you can use separation of variables to write down the solutions of, say, the heat equation in nice geometries.
+But remember that the first principle is always a conservation law.
+A differential equation is a second principle that follows from a more fundamental conservation law.
+
+Having said all that, let's look at how you get from a conservation law to a differential equation.
+The \emph{divergence theorem} states that, for any nice vector field $\bs F$ and domain $\omega$,
+\begin{equation}
+    \int_\omega\bs F\cdot\bs \nu\; ds = \int_\omega\nabla\cdot\bs F\;dx
+\end{equation}
+where $\nabla\cdot\bs F = \partial_xF_x + \partial_yF_y + \partial_zF_z$.
+We can only use this when the vector field is differentiable.
+When it isn't, we have to fall back to the conservation law.
+
+Suppose that some field $\phi$ obeys a certain conservation law.
+Applying the divergence theorem, we can turn the surface integral over $\partial\omega$ into a volume integral over all $\omega$ and rearrange things:
+\begin{equation}
+    \int_\omega\left(\frac{\partial}{\partial t}\phi + \nabla\cdot\bs F - S\right)dx = 0.
+\end{equation}
+The only way that this integral can evaluate to zero \emph{for all} control volumes $\omega$ is if the integrand is zero:
+\begin{equation}
+    \frac{\partial}{\partial t}\phi + \nabla\cdot\bs F = S.
+\end{equation}
+This papers over some questions about boundary conditions which we'll largely ignore.
+
+
+\section{Variational forms}
+
+There is yet a third way to describe physics problems.
+When we derived a differential equation from a conservation law, we had to use the divergence theorem.
+This step doesn't work when some of the fields involved have discontinuities, which happens for example when studying heat conduction at the interface between two distinct media, or the propagation of sound waves between a solid and a fluid.
+This third way -- the variational form -- is completely equivalent to the conservation form.
+
+In all cases, the thing that we are trying to solve for or approximate is a scalar, vector, or tensor field.
+When we study conservation laws, we specify how the field of interest evolves by positing a certain equation or balance law that has to hold for all \emph{control volumes}.
+For a differential equation, we instead state that a certain differential equation has to hold for all \emph{points} inside the domain $\Omega$.
+A variational form, on the other hand, is an equation that is quantified over all \emph{functions}.
+This has a nice sort of symmetry because we are looking for a function and we are quantifying over functions.
+
+To derive a variational form from a conservation law, I have to introduce two new ideas.
+
+First, suppose you have some arbitrary differentiable function $\psi$.
+We can then consider the super-level sets of $\psi$:
+\begin{equation}
+    \{x \in \Omega: \psi(x) \ge z\}.
+\end{equation}
+Very often we'll abbreviate this as
+\begin{equation}
+    \{\psi \ge z\}.
+\end{equation}
+For example, if the domain is all of $\mathbb{R}^2$ and $\psi = |x|^2$, then the super-level set for a value $z$ is the disc of radius $\sqrt z$.
+The boundary of the super-level set is just the level set, $\{\psi = z\}$, i.e. the contour line or surface of the function.
+
+\textcolor{red}{Finish this...}
+
+To put all of this together.
+To get from a conservation law to a variational form, do the following:
+\begin{enumerate}
+    \item Replace integrating over $\omega$ with multiplying by $\psi$ and integrating over $\Omega$.
+        So
+        \begin{equation}
+            \int_\omega\frac{\partial\phi}{\partial t}\; dx \mapsto \int_\Omega \frac{\partial\phi}{\partial t}\psi\; dx
+        \end{equation}
+        and likewise for the source term.
+    \item Replace the integral of the flux over $\partial\omega$ with multiplying by $-\nabla \psi$ and integrating over $\Omega$.
+        So
+        \begin{equation}
+            \int_{\partial\omega}\bs F\cdot\bs \nu\;ds \mapsto -\int_\Omega\bs F\cdot\nabla\psi\;dx
+        \end{equation}
+    \item Deal with the boundary conditions.
+\end{enumerate}
+This is a little mechanistic and you should try to understand it on deeper terms if you can, but the recipe above will get you pretty far.
+
+\pagebreak
+
+%\bibliographystyle{plainnat}
+%\bibliography{text-for-rob.bib}
+
+\end{document}

@@ -1,0 +1,373 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+%\usepackage{amsfonts}
+\usepackage{amsthm}
+%\usepackage{amssymb}
+%\usepackage{mathrsfs}
+%\usepackage{fullpage}
+%\usepackage{mathptmx}
+%\usepackage[varg]{txfonts}
+\usepackage{color}
+\usepackage[charter]{mathdesign}
+\usepackage[pdftex]{graphicx}
+%\usepackage{float}
+\usepackage{hyperref}
+%\usepackage[modulo, displaymath, mathlines]{lineno}
+%\usepackage{setspace}
+%\usepackage[titletoc,toc,title]{appendix}
+\usepackage{natbib}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+%\linenumbers
+%\doublespacing
+
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+\newtheorem*{exm}{Example}
+\newtheorem*{exc}{Excercise}
+
+\theoremstyle{plain}
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+\newtheorem*{prop}{Proposition}
+\newtheorem*{cor}{Corollary}
+
+\newcommand{\argmin}{\text{argmin}}
+\newcommand{\ud}{\hspace{2pt}\mathrm{d}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\PP}{\mathsf{P}}
+
+\title{Review: complex numbers and linear algebra}
+\author{Daniel Shapero}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+We're going to use a fair amount of linear algebra.
+Hopefully you've seen all this before, and if you're a little rusty this should jog your memory on the important parts.
+Do not ever feel bad about asking me to review this stuff.
+
+
+\section{Complex numbers}
+
+The imaginary unit $i$ is a number such that $i^2 = -1$.
+A complex number is any number $z$ of the form
+\begin{equation}
+    z = x + i\cdot y
+\end{equation}
+where $x$ and $y$ are real numbers.
+We write the set of all real numbers as $\mathbb{R}$ and the set of all complex numbers as $\mathbb{C}$.
+One of the reasons that we care about complex numbers is that, for any polynomial $p$ with complex coefficients, all of its roots can be found in the complex plane.
+This is contrast to the real numbers, where for example the real polynomial
+\begin{equation}
+    p(x) = x^2 + 1
+\end{equation}
+has no real roots, but has the complex roots $+i$ and $-i$.
+This is going to become very relevant to us when we want to look at eigenvalues of matrices; real matrices can have complex eigenvalues.
+
+When I learned about complex numbers in high school I thought it was idiotic.
+(``\emph{Imaginary} numbers?
+Is this some sick joke?!'')
+Historically, complex function theory was an integral part of the study of fluid mechanics and aerodynamics until the computer age.
+The Joukowski airfoil and related ideas were part of the design of the American P51 Mustang during WWII.
+So, if you're wondering what ``imaginary'' numbers are good for, applications include the vanquishing of the Nazi menace.
+While computers overtook the old techniques for aeronautical engineering in the 70s, complex analytic methods were still used for some time after; see \href{http://acversailles.free.fr/documentation/08%7EDocumentation_Generale_M_Suire/Aerodynamique/Profils/Theorie/Profil-Dessin/Design_your_own_airfoil.pdf}{this article} from Sport Aviation from 1984.
+
+Given any complex number $z = x + iy$, we define its complex conjugate
+\begin{equation}
+    \bar z = x - iy.
+\end{equation}
+If you imagine all the purely real numbers as lying along the $x$-axis in the plane and all the purely imaginary numbers lying along the $y$-axis, then complex conjugation flips numbers over the real axis.
+You'll also see people write conjugation as $z^*$.
+
+\begin{exc} Show that $\overline{u\cdot v} = \overline{u}\cdot\overline{v}$.\end{exc}
+\begin{exc}Show that $z\cdot\bar z$ is the square of the length of $z$, viewed as a point in the plane.\end{exc}
+\begin{exc}Show that, given two complex numbers $z = x + iy$ and $w = u + iv$, we can write their quotient $z / w$ as a number with real denominator. (Hint: multiply and divide by $\bar w$.)\end{exc}
+
+Recall that the Taylor series for the exponential function is
+\begin{equation}
+    \exp(z) = 1 + z + \frac{z^2}{2} + \ldots = \sum_{n = 0}^\infty\frac{z^n}{n!}
+\end{equation}
+and the Taylor series for the trigonometric functions are
+\begin{align}
+    \cos z & = \sum_{n = 0}^\infty\frac{(-1)^n}{(2n)!}z^{2n} \\
+    \sin z & = \sum_{n = 0}^\infty\frac{(-1)^n}{(2n + 1)!}z^{2n + 1}.
+\end{align}
+Now since $i^2 = -1$, we also know that $i^3 = -1$ and $i^4 = 1$.
+From these relations, you can show by comparing Taylor series that
+\begin{equation}
+    \exp(i\theta) = \cos\theta + i\sin\theta.
+\end{equation}
+Moreover, we can also show that $\exp(\bar z) = \overline{\exp(z)}$, which implies that
+\begin{equation}
+    \exp(i\theta) = \cos\theta - i\sin\theta.
+\end{equation}
+From these pairs of equations, we can then deduce that
+\begin{align}
+    \cos\theta & = \frac{\exp(i\theta) + \exp(-i\theta)}{2} \\
+    \sin\theta & = \frac{\exp(i\theta) - \exp(-i\theta)}{2i}.
+\end{align}
+Now you never have to remember a trig identity again, you can derive them all from the fact that $\exp(w + z) = \exp(w)\exp(z)$.
+
+Finally, remember that $\cos^2\theta + \sin^2\theta = 1$ for all real $\theta$.
+What this means is that $\exp(i\theta)$ is always a complex number of magnitude 1.
+Another way you can think of this is that the exponential function wraps the imaginary axis around the unit circle.
+This is going to come up when we look at eigenvalues of matrices associated to wave-type equations.
+
+
+\section{Vectors and vector spaces}
+
+Vectors are things that you can add together or multiply by scalars.
+The scalar field could be the real numbers $\mathbb{R}$ or the complex numbers $\mathbb{C}$.
+We usually denote vectors by $u, v, w$ and scalars by Greek letters.
+Vectors live in vector spaces, which we denote by $V$.
+Usually, we're interested in \emph{finite-dimensional} vector spaces, in which case $V$ is just the set of $n$-tuples of real numbers $\mathbb{R}^n$.
+
+Let $\{v_1, \ldots, v_k\}$ be a set of vectors in some vector space $V$ and $\alpha_1, \ldots, \alpha_k$ a set of scalars.
+We call the quantity
+\begin{equation}
+    \alpha_1\cdot v_1 + \ldots + \alpha_k\cdot v_k
+\end{equation}
+a linear combination of the vectors.
+We say that this set of vectors is \emph{linearly independent} if
+\begin{equation}
+    \alpha_1v_1 + \ldots + \alpha_kv_k = 0
+\end{equation}
+if and only if $\alpha_1 = \ldots = \alpha_k = 0$.
+A set of vectors is a basis for $V$ if it is linearly independent and if every vector $v$ can be written as a linear combination of vectors in the set.
+
+
+\section{Norms}
+
+Vectors usually have some concept of length.
+I'd like to pretend that I'll be entirely consistent about notation but if we're being real here that's unlikely.
+So the length of a vector $v$ will be written as $\|v\|$ or $|v|$.
+It's a real number with the property that
+\begin{equation}
+    \|\alpha\cdot v\| = |\alpha|\cdot\|v\|
+\end{equation}
+for any scalar $\alpha$,
+\begin{equation}
+    \|v\| \ge 0
+\end{equation}
+with equality if and only if $v$ is the zero vector, and
+\begin{equation}
+    \|v + w\| \le \|v\| + \|w\|.
+\end{equation}
+You're probably most familiar with the Euclidean norm of a vector:
+\begin{equation}
+    \|v\|_2 = \sqrt{\sum_{k = 1}^n|v_k|^2}
+\end{equation}
+but there are other kinds of norms.
+For example, if $p \ge 1$, you can also measure the length of a vector like so:
+\begin{equation}
+    \|v\|_p = \left(\sum_{k = 1}^n|v_k|^p\right)^{\frac{1}{p}}.
+\end{equation}
+In other words, there is no unique norm on a vector space.
+
+This gets a little more interesting when we look at other kinds of vector spaces.
+For example, supposed $\Omega$ is a nice domain in $\mathbb{R}^d$.
+Our vector space $V$ is the set of all \emph{functions} $u$ that map $\Omega$ to the reals.
+We can define norms for $V$ by
+\begin{equation}
+    \|u\|_p = \left(\int_\Omega|u(x)|^p\; dx\right)^{\frac{1}{p}}.
+\end{equation}
+We'll see more of this later.
+
+
+\section{Inner products}
+
+You're probably familiar with the dot product of two vectors:
+\begin{equation}
+    v\cdot w = \sum_{k = 1}^nv_kw_k.
+\end{equation}
+This is the Euclidean \emph{inner product} for a real vector space.
+There are other kinds of inner products which we'll see shortly.
+More generally, we often write an inner product as
+\begin{equation}
+    \langle v, w\rangle
+\end{equation}
+using angle brackets (\texttt{langle} and \texttt{rangle} in LaTeX).
+In the event that the vectors can have complex entries, we actually want the complex conjugate of the first argument:
+\begin{equation}
+    \langle v, w\rangle = \sum_{k = 1}^n\overline{v_k}w_k.
+\end{equation}
+You'll see why we did this below.
+
+An inner product is defined to have the properties that switching the arguments gives a complex conjugate:
+\begin{equation}
+    \langle v, w\rangle = \overline{\langle w, v\rangle},
+\end{equation}
+it is linear in the second argument:
+\begin{equation}
+    \langle u, \alpha v + \beta w\rangle = \alpha\langle u, v\rangle + \beta\langle u, w\rangle,
+\end{equation}
+and it is positive-definite:
+\begin{equation}
+    \langle v, v\rangle \ge 0
+\end{equation}
+with equality if and only if $v$ is the zero vector.
+
+An inner product lets us define a norm:
+\begin{equation}
+    \|v\| = \sqrt{\langle v, v\rangle}.
+\end{equation}
+This is why we wanted the complex conjugate on the first argument in case we're dealing with complex vectors.
+Just focusing on one component of $v$, the quantity $\overline{v_k}v_k$ is a real number and it's equal to $|v_k|^2$, whereas $v_k^2$ can have an imaginary component if $v_k$ is some general complex number.
+(Example: try it for $1 + i$.)
+
+Not every norm comes from an inner product.
+For example, the $p$-norm defined in the previous section doesn't come from an inner product if $p$ is not equal to 2.
+
+If $M$ is a symmetric and positive-definite matrix (more on that later), then taking
+\begin{equation}
+    \langle u, v\rangle = \sum_{i, j}M_{ij}\overline{u_i}v_j
+\end{equation}
+also defines an inner product.
+In other words, the choice of inner product is not unique.
+
+You can also think about inner products on spaces of functions too.
+Suppose again $\Omega$ is a nice domain and $u$ and $v$ are functions defined on $\Omega$; we can then define
+\begin{equation}
+    \langle u, v\rangle = \int_\Omega \overline{u(x)}\cdot v(x)\; dx.
+\end{equation}
+This defines a space of functions which we usually denote as $L^2(\Omega)$.
+
+
+\section{Spaces of functions}
+
+It's easy to imagine that all vector spaces are just $\mathbb{R}^n$ for some value of $n$.
+It's also easy to conflate a vector space with a particular basis for that space.
+Neither of these is really true and I'd like to dispell you of this notion early.
+For example, suppose we're trying to fit polynomials to some observational data or to the trajectory of a system that evolves in time.
+Here the vector space is the set of polynomials up to some degree $n$ that we'll have to choose.
+(Add up two polynomials of degree $\le n$ and you get another polynomial of degree $\le n$, same for scalar multiplication.)
+A polynomial has an existence independent of any basis you might choose for it.
+We can define the inner product between any two polynomials $p$ and $q$ as
+\begin{equation}
+    \langle p, q \rangle = \int_0^Tp(t)q(t)\ud t
+\end{equation}
+without any reference to a particular basis.
+For example, we could use the \emph{monomial} basis $\{1, t, t^2, \ldots, t^n\}$ and write a polynomial $p$ as
+\begin{equation}
+    p(t) = p_0\cdot 1 + p_1\cdot t^1 + \ldots + p_n\cdot t^n.
+\end{equation}
+This will work, but suppose $t$ represents time.
+Each coefficient $p_k$ has different units of [time]${}^{-k}$.
+There are some important senses in which the monomial basis is hard to work with and so other bases are often used in practice.
+For example, in a vector graphics drawing program, you might have used splines.
+The spline basis is
+\begin{equation}
+    p_k(t) = \binom{n}{k}(t / T)^k(1 - t / T)^{n - k}.
+\end{equation}
+If you've ever used a vector graphics drawing program, you were really using cubic splines.
+If you were trying to solve a boundary value problem, you might instead use \emph{orthogonal} polynomials, which have the property that
+\begin{equation}
+    \int_0^Tp_j(t)p_k(t)\ud t = 0
+\end{equation}
+if $j \neq k$.
+We'll see both of these down the line.
+
+
+\section{Linear maps and eigenvalues}
+
+A linear map is a function $A$ from a vector space $V$ to a vector space $W$ such that, for all scalars $\alpha_1$, $\alpha_2$ and vectors $v_1$, $v_2$,
+\begin{equation}
+    A(\alpha_1v_1 + \alpha_2v_2) = \alpha_1 A v_1 + \alpha_2 A v_2.
+\end{equation}
+In other words, linear maps ``preserve'' the vector space operations.
+
+Once we have bases for $V$ and $W$, we can represent a linear map by a matrix.
+But I want to emphasize that linear maps have an existence independent of any particular basis.
+
+\begin{exc}
+    Let $V$ be the space of polynomials of degree $n$.
+    (You can take $n = 5$ just to be as concrete as possible first.)
+    Let $A$ be the operation of taking derivatives of polynomials.
+    Write down the matrix expression of $A$ when we use the monomial basis.
+    Now either look up or derive what the derivative does to splines and write down the matrix for differentiation in the spline basis.
+    Now do it for orthogonal polynomials.
+    Use sympy and experiment if you want.
+\end{exc}
+
+Suppose $A$ is a linear map from a vector space $V$ to itself.
+Then a vector $v$ is an eigenvector of $A$ with eigenvalue $\lambda$ if
+\begin{equation}
+    A\cdot v = \lambda\cdot v.
+\end{equation}
+Another way of writing this is that
+\begin{equation}
+    (A - \lambda I)v = 0
+\end{equation}
+where $I$ is the identity matrix.
+This means that the matrix $A - \lambda I$ has a non-trivial null space.
+If we're looking at finite-dimensional vector spaces, this implies that
+\begin{equation}
+    \det(A - \lambda I) = 0.
+\end{equation}
+The quantity
+\begin{equation}
+    p_A(\lambda) = \det(A - \lambda I)
+\end{equation}
+is a polynomial, and we call it the \emph{characteristic polynomial} of $A$.
+The reason that we had to talk about complex numbers before is because many real matrices of interest to us have complex roots.
+For example, consider the matrix
+\begin{equation}
+    A = \left[\begin{matrix} 0 & 1 \\ -1 & 0\end{matrix}\right].
+\end{equation}
+This matrix rotates vectors in the plane by $\pi / 2$.
+It has real entries, but its characteristic polynomial is $p_A(\lambda) = \lambda^2 + 1$ and therefore its eigenvalues are $i$ and $-i$.
+
+Suppose $V$ and $W$ are inner product spaces and $A : V \to W$ is a linear map.
+There is a linear map $A^* : W \to V$ such that
+\begin{equation}
+    \langle w, A\,v\rangle_W = \langle A^*\,w, v\rangle_V.
+\end{equation}
+(I've written subscripts on the inner products to make it clearer that they take place in different spaces.)
+This operator is called the \emph{adjoint} of $A$.
+If we're using matrices and the usual inner product, then
+\begin{equation}
+    (A^*)_{ij} = \overline{A_{ji}},
+\end{equation}
+i.e. we take the transpose of the matrix and take complex conjugates of every entry.
+You should try to convince yourself that $A^{**} = A$.
+
+An operator $A : V \to V$ is called \emph{self-adjoint} if
+\begin{equation}
+    A^* = A
+\end{equation}
+and \emph{skew-} or \emph{anti}-self adjoint if
+\begin{equation}
+    A^* = -A.
+\end{equation}
+
+\begin{exc}
+    Suppose $V$ is the space of all trigonometric polynomials up to degree $N$, i.e. the span of $\{e^{-iN\theta}, \ldots, 1, \ldots, e^{iN\theta}\}$.
+    Write down the matrix expression for the derivative operator in this basis.
+    What is the adjoint of this operator?
+\end{exc}
+
+Self-adjoint operators can only have real eigenvalues, and skew-adjoint operators can only have imaginary eigenvalues.
+To see why, note that a complex number $z$ is purely real if $\bar z = z$, and a complex number is purely imaginary if $\bar z = -z$.
+Suppose that $\lambda$, $v$ are an eigenpair for $A$ and first that $A$ is self-adjoint.
+Then
+\begin{align}
+    \lambda \|v\|^2 & = \langle v, \lambda v\rangle \nonumber\\
+    & = \langle v, A\,v\rangle \nonumber\\
+    & = \overline{\langle A\, v, v\rangle} \nonumber\\
+    & = \overline{\langle \lambda v, v\rangle} \nonumber\\
+    & = \bar\lambda\|v\|^2.
+\end{align}
+Dividing through by $\|v\|^2$, we find that $\lambda = \bar\lambda$ and hence the eigenvalue is purely real.
+You can try the skew-adjoint case yourself.
+
+\textbf{Why do we care?}
+As we'll show in the next lecture, the operators that you get when you discretize \emph{diffusive} problems tend to self-adjoint and even positive-definite, so their eigenvalues are positive.
+The operators that you get when you discretize \emph{wave} equations tend to be (almost) skew-adjoint, so their eigenvalues are purely imaginary.
+
+
+\end{document}
