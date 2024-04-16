@@ -1,4 +1,8 @@
 # ------
+# Data
+*.tif
+
+# ------
 # Python
 
 # Byte-compiled / optimized / DLL files
